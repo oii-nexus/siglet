@@ -1,4 +1,4 @@
-= Siglet = Sigma.js + Leaflet.js =
+# Siglet = Sigma.js + Leaflet.js
 
 An incomplete start on using the leaflet.js rendering to display a map as well as network data from Sigma.js
 
