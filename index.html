@@ -1,0 +1,153 @@
+
+<head>
+<link rel="stylesheet" href="css/leaflet.css" />
+<script src="js/leaflet-src.js"></script>
+
+<script src="js/sigma.require.js"></script>
+<script src="js/sigma.parsers.json.js"></script>
+<script src="js/siglet.js"></script>
+
+<script src="js/jquery-1.10.2.js"></script>
+<style>
+#mapid { 
+	height: 100%;
+	width: 100%;
+	}
+/*.leaflet-popup-close-button {
+	display: none;
+}*/
+.popup-details {
+	display: none;
+}
+</style>
+
+</head>
+
+<body>
+<div id="mapid"></div>
+   
+
+<script language="JavaScript">
+var map;
+$( document ).ready(function() {
+	'use strict';
+	//Load config	
+
+
+	var uk_post_districts,uk_map;
+	
+	map = L.map('mapid',{preferCanvas:false}).setView([51.505, -0.09], 10);
+
+	jQuery.getJSON("data/london_boroughs.json",function(data) {
+		uk_map=data;
+		L.geoJson(uk_map, {
+			interactive:false,
+			style: function (feature) {
+				return {color: "#000",fillColor:"#ffffff",weight:0.5};
+			},
+					
+		/*onEachFeature: function (feature, layer) {
+            layer.bindPopup("aaaaa"); //This line enables popups on click
+
+            layer.on('mouseover', function (e) {
+                //Popup
+                this.openPopup();
+            });
+
+            layer.on('mouseout', function (e) {
+                //Popup
+                this.closePopup()
+            });
+        }*/
+			       
+			       
+			}).addTo(map);
+	});
+
+	
+	/*L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		maxZoom: 18,
+		id: 'your.mapbox.project.id',
+		accessToken: 'your.mapbox.public.access.token'
+	}).addTo(map);*/
+
+if (true) {	
+	var s;
+	sigma.parsers.json("data/london.json",function(graph) {
+		console.log(graph);
+		/*s = new sigma({"graph":graph});
+		s.addRenderer({
+			type: 'siglet',
+			container: map
+		});
+		s.render();*/
+		s = new sigma(
+		{
+			graph: graph,
+			renderer: {
+				type: sigma.renderers.siglet, //or 'siglet'
+				container: map
+			},
+			settings: {drawEdges:true} //config["sigma"]["settings"]
+		});
+		
+		s.clusters={};
+		s.graph.nodes().forEach(function(n) {
+			n.originalColor = n.color;
+			if (! (n.color in s.clusters)) {
+				s.clusters[n.color]=[];
+			}
+			s.clusters[n.color].push(n.id);
+			n["_leaflet"]
+				//.setStyle({title:n["label"],stroke:false})
+				.on("mouseover",function(evt) {
+					console.log(evt);
+					//console.log(evt.target._radius);
+					evt.target.bindPopup(n["label"],{"closeButton":false,offset: [0,-evt.target._radius]}).openPopup();
+					//var p = L.popup().setLatLng(evt.latlng).setContent("asdf").openOn(map);
+					//p.on("click",function(evt) {console.log("got you");});
+				})
+			//n["_leaflet"]["_popup"]
+				.on("click",function(evt) {
+					//$(obj["target"]).removeClass("popup-details");
+					console.log(evt);
+					//obj["target"].openPopup({autoClose:false,closeButton:true});
+					/*var popup = L.popup({autoClose:false})
+						.setLatLng(obj["target"]["_latlng"])
+						.setContent('<p>Hello world!This is a nice popup.</p>')
+						.addLayer(map);*/
+				});
+		});
+		
+		
+		//graph_setup(s);
+		//console.log(s.graph.nodes());
+		//s.refresh();
+		});
+		
+}//if false		
+
+		/*var oxf = [51.751944, -1.257778];
+		var lon = [51.507222, -0.1275];
+
+		//var polyline = L.edge([oxf,lon], {color: 'blue'}).addTo(map);	
+	
+		var n1 = L.circle( oxf, {"radius":10000, fill: true, fillColor: "#00FF00", fillOpacity: 1, stroke: false}).addTo(map);
+		n1.on("mouseover click",function(e){console.log(e)});
+	
+		//var n2 = L.node( lon, {"radius":10000, fillOpacity: 1, stroke: false} ).addTo(map);
+		
+		
+		var latlngs = [oxf,lon];
+		var polygon = L.polyline(latlngs, {color: 'red'}).on("mouseover",function(e){console.log(e);}).addTo(map);
+		// zoom the map to the polygon
+		map.fitBounds(polygon.getBounds());*/
+	
+		
+	
+});
+	
+</script>
+
+</body>
